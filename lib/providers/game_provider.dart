@@ -36,28 +36,40 @@ class GameProvider extends ChangeNotifier {
   }
 
   Future<void> makeAIMove() async {
-    if (_game.turn != chess.Color.BLACK || _isThinking || _game.game_over) return;
+    if (_game.turn != chess.Color.BLACK || _isThinking || _game.game_over) {
+      print('Skipping AI move: wrong turn or game state');
+      return;
+    }
     
     _isThinking = true;
     notifyListeners();
 
     try {
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Small delay for UI feedback
+      await Future.delayed(const Duration(milliseconds: 500));
 
+      // Get AI move
       final move = ChessAI.getBestMove(_game);
-      print('AI selected move: $move'); // Debug print
+      print('AI move selected: $move');
 
-      if (move != null && !_game.game_over) {
-        final result = _game.move(move);
-        print('Move result: $result'); // Debug print
+      if (move != null) {
+        // Make the move
+        final result = _game.move({
+          'from': move['from']!,
+          'to': move['to']!,
+          if (move['promotion'] != null) 'promotion': move['promotion']
+        });
+
+        print('Move made: $result');
+        
         if (result == null) {
-          print('Invalid move attempted by AI'); // Debug print
+          print('Failed to make move: ${move['from']} to ${move['to']}');
         }
       } else {
-        print('No move selected by AI'); // Debug print
+        print('No valid moves found for AI');
       }
     } catch (e) {
-      print('AI move error: $e');
+      print('Error making AI move: $e');
     } finally {
       _isThinking = false;
       _selectedPiece = null;
@@ -67,16 +79,22 @@ class GameProvider extends ChangeNotifier {
   }
 
   Future<bool> movePiece(String from, String to) async {
-    if (_game.turn != chess.Color.WHITE || _isThinking) return false;
+    if (_game.turn != chess.Color.WHITE || _isThinking) {
+      print('Invalid move attempt: wrong turn or thinking');
+      return false;
+    }
     
     try {
       final move = _game.move({'from': from, 'to': to});
       if (move != null) {
+        print('Player moved: $from to $to');
         _selectedPiece = null;
         _validMoves = [];
         notifyListeners();
         
+        // Make AI move after a short delay
         if (!_game.game_over) {
+          await Future.delayed(const Duration(milliseconds: 500));
           await makeAIMove();
         }
         return true;
