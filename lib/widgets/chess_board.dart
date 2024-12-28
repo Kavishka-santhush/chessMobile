@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import 'chess_piece.dart';
+import 'package:chess/chess.dart' as chess;
 
 class ChessBoard extends StatelessWidget {
   const ChessBoard({super.key});
@@ -46,8 +47,8 @@ class ChessBoard extends StatelessWidget {
                 ),
                 child: piece != null
                     ? ChessPiece(
-                        piece: piece['type'].toString(),
-                        isWhite: piece['color'].toString() == 'w',
+                        piece: piece.type.toString(),
+                        isWhite: piece.color == chess.Color.WHITE,
                       )
                     : null,
               ),

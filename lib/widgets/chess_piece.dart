@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 class ChessPiece extends StatelessWidget {
   final String piece;
@@ -27,15 +26,15 @@ class ChessPiece extends StatelessWidget {
         case 'p':
           return Icons.person;
         case 'r':
-          return Icons.castle;
+          return Icons.fort;
         case 'n':
-          return Icons.sports_hockey;
+          return Icons.emoji_nature;
         case 'b':
-          return Icons.church;
+          return Icons.change_history;
         case 'q':
-          return Icons.corona;
+          return Icons.stars;
         case 'k':
-          return Icons.king_bed;
+          return Icons.workspace_premium;
         default:
           return Icons.help_outline;
       }
