@@ -26,7 +26,7 @@ class ChessPiece extends StatelessWidget {
         case 'p':
           return Icons.person;
         case 'r':
-          return Icons.fort;
+          return Icons.account_balance;
         case 'n':
           return Icons.emoji_nature;
         case 'b':

@@ -44,7 +44,7 @@ class ChessAI {
       return evaluateBoard(game);
     }
 
-    List<Map<String, String>> moves = game.moves({'verbose': true});
+    final moves = game.moves({'verbose': true}) as List<Map<String, dynamic>>;
     
     if (maximizing) {
       int maxEval = -999999;
@@ -71,11 +71,11 @@ class ChessAI {
     }
   }
 
-  static Map<String, String>? getBestMove(chess.Chess game) {
-    List<Map<String, String>> moves = game.moves({'verbose': true});
+  static Map<String, dynamic>? getBestMove(chess.Chess game) {
+    final moves = game.moves({'verbose': true}) as List<Map<String, dynamic>>;
     if (moves.isEmpty) return null;
 
-    Map<String, String>? bestMove;
+    Map<String, dynamic>? bestMove;
     int bestValue = -999999;
 
     for (var move in moves) {

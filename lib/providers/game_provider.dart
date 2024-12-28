@@ -46,7 +46,11 @@ class GameProvider extends ChangeNotifier {
 
     final move = ChessAI.getBestMove(_game);
     if (move != null) {
-      _game.move(move);
+      if (move is Map) {
+        _game.move(move);
+      } else if (move is String) {
+        _game.move({'from': move.substring(0, 2), 'to': move.substring(2, 4), 'promotion': move.length > 4 ? move.substring(4) : 'q'});
+      }
     }
 
     _isThinking = false;
