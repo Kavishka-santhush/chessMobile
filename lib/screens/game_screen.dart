@@ -39,6 +39,22 @@ class GameScreen extends StatelessWidget {
             ),
             Consumer<GameProvider>(
               builder: (context, gameProvider, _) {
+                if (gameProvider.isThinking) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const CircularProgressIndicator(),
+                        const SizedBox(width: 16),
+                        Text(
+                          'AI is thinking...',
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ],
+                    ),
+                  );
+                }
                 if (gameProvider.isGameOver) {
                   return Padding(
                     padding: const EdgeInsets.all(16.0),

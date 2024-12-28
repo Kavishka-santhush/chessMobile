@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:chess/chess.dart' as chess;
+import '../utils/chess_ai.dart';
 
 class GameProvider extends ChangeNotifier {
   late chess.Chess _game;
   String? _selectedPiece;
   List<String> _validMoves = [];
+  bool _isThinking = false;
 
   GameProvider() {
     _game = chess.Chess();
@@ -14,10 +16,14 @@ class GameProvider extends ChangeNotifier {
   String? get selectedPiece => _selectedPiece;
   List<String> get validMoves => _validMoves;
   bool get isGameOver => _game.game_over;
+  bool get isThinking => _isThinking;
   String? get winner => isGameOver ? (_game.in_checkmate ? (_game.turn == chess.Color.WHITE ? 'Black' : 'White') : 'Draw') : null;
 
   void selectPiece(String square) {
-    if (_game.get(square) == null) {
+    if (_game.turn != chess.Color.WHITE || _isThinking) return; // Only allow white moves when it's player's turn
+    
+    final piece = _game.get(square);
+    if (piece == null || piece.color != chess.Color.WHITE) {
       _selectedPiece = null;
       _validMoves = [];
     } else {
@@ -29,13 +35,40 @@ class GameProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool movePiece(String from, String to) {
+  Future<void> makeAIMove() async {
+    if (_game.turn != chess.Color.BLACK || _isThinking || _game.game_over) return;
+    
+    _isThinking = true;
+    notifyListeners();
+
+    // Add a small delay to show the thinking state
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final move = ChessAI.getBestMove(_game);
+    if (move != null) {
+      _game.move(move);
+    }
+
+    _isThinking = false;
+    _selectedPiece = null;
+    _validMoves = [];
+    notifyListeners();
+  }
+
+  Future<bool> movePiece(String from, String to) async {
+    if (_game.turn != chess.Color.WHITE || _isThinking) return false;
+    
     try {
       final move = _game.move({'from': from, 'to': to});
       if (move != null) {
         _selectedPiece = null;
         _validMoves = [];
         notifyListeners();
+        
+        // Make AI move after player's move
+        if (!_game.game_over) {
+          await makeAIMove();
+        }
         return true;
       }
     } catch (e) {
@@ -48,6 +81,7 @@ class GameProvider extends ChangeNotifier {
     _game = chess.Chess();
     _selectedPiece = null;
     _validMoves = [];
+    _isThinking = false;
     notifyListeners();
   }
 }
