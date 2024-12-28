@@ -1,6 +1,9 @@
 import 'package:chess/chess.dart' as chess;
+import 'dart:math' as math;
 
 class ChessAI {
+  static final math.Random _random = math.Random();
+
   static const int MAX_DEPTH = 2;  // Reduced depth for faster computation
   
   static Map<String, int> pieceValues = {
@@ -42,26 +45,27 @@ class ChessAI {
   static Map<String, dynamic>? getBestMove(chess.Chess game) {
     if (game.game_over) return null;
 
+    // Get all legal moves for black
     final moves = game.moves({'verbose': true}) as List<Map<String, dynamic>>;
     if (moves.isEmpty) return null;
 
-    // Add randomness to move selection for variety
-    moves.shuffle();
-
-    Map<String, dynamic>? bestMove;
-    int bestValue = -99999;
-
+    // Evaluate each move
+    List<MapEntry<Map<String, dynamic>, int>> scoredMoves = [];
+    
     for (var move in moves) {
       game.move(move);
-      int value = -evaluateBoard(game);  // Simplified evaluation
+      int score = -evaluateBoard(game);  // Negative because we're playing as black
       game.undo();
-
-      if (value > bestValue) {
-        bestValue = value;
-        bestMove = move;
-      }
+      scoredMoves.add(MapEntry(move, score));
     }
 
-    return bestMove;
+    // Sort moves by score
+    scoredMoves.sort((a, b) => b.value.compareTo(a.value));
+
+    // Select one of the top 3 moves randomly for variety
+    int topMoves = math.min(3, scoredMoves.length);
+    int selectedIndex = _random.nextInt(topMoves);
+    
+    return scoredMoves[selectedIndex].key;
   }
 }
