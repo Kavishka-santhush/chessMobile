@@ -20,7 +20,7 @@ class GameProvider extends ChangeNotifier {
   String? get winner => isGameOver ? (_game.in_checkmate ? (_game.turn == chess.Color.WHITE ? 'Black' : 'White') : 'Draw') : null;
 
   void selectPiece(String square) {
-    if (_game.turn != chess.Color.WHITE || _isThinking) return; // Only allow white moves when it's player's turn
+    if (_game.turn != chess.Color.WHITE || _isThinking) return;
     
     final piece = _game.get(square);
     if (piece == null || piece.color != chess.Color.WHITE) {
@@ -29,7 +29,7 @@ class GameProvider extends ChangeNotifier {
     } else {
       _selectedPiece = square;
       _validMoves = _game.moves({'square': square, 'verbose': true})
-          .map((move) => move['to'].toString())
+          .map((move) => (move as Map<String, dynamic>)['to'].toString())
           .toList();
     }
     notifyListeners();
@@ -41,16 +41,11 @@ class GameProvider extends ChangeNotifier {
     _isThinking = true;
     notifyListeners();
 
-    // Add a small delay to show the thinking state
     await Future.delayed(const Duration(milliseconds: 500));
 
     final move = ChessAI.getBestMove(_game);
     if (move != null) {
-      if (move is Map) {
-        _game.move(move);
-      } else if (move is String) {
-        _game.move({'from': move.substring(0, 2), 'to': move.substring(2, 4), 'promotion': move.length > 4 ? move.substring(4) : 'q'});
-      }
+      _game.move(move);
     }
 
     _isThinking = false;
@@ -69,7 +64,6 @@ class GameProvider extends ChangeNotifier {
         _validMoves = [];
         notifyListeners();
         
-        // Make AI move after player's move
         if (!_game.game_over) {
           await makeAIMove();
         }

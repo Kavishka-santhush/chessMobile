@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:chess/chess.dart' as chess;
 
 class ChessPiece extends StatelessWidget {
-  final String piece;
+  final chess.PieceType piece;
   final bool isWhite;
 
   const ChessPiece({
@@ -22,18 +23,18 @@ class ChessPiece extends StatelessWidget {
     final color = isWhite ? Colors.white : Colors.black;
     
     IconData getIcon() {
-      switch (piece.toLowerCase()) {
-        case 'p':
+      switch (piece) {
+        case chess.PieceType.PAWN:
           return Icons.person;
-        case 'r':
+        case chess.PieceType.ROOK:
           return Icons.account_balance;
-        case 'n':
+        case chess.PieceType.KNIGHT:
           return Icons.emoji_nature;
-        case 'b':
+        case chess.PieceType.BISHOP:
           return Icons.change_history;
-        case 'q':
-          return Icons.stars;
-        case 'k':
+        case chess.PieceType.QUEEN:
+          return Icons.star;
+        case chess.PieceType.KING:
           return Icons.workspace_premium;
         default:
           return Icons.help_outline;

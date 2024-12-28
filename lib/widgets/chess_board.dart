@@ -47,7 +47,7 @@ class ChessBoard extends StatelessWidget {
                 ),
                 child: piece != null
                     ? ChessPiece(
-                        piece: piece.type.toString(),
+                        piece: piece.type,
                         isWhite: piece.color == chess.Color.WHITE,
                       )
                     : null,
