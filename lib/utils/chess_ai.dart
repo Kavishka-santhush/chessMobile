@@ -1,20 +1,20 @@
 import 'package:chess/chess.dart' as chess;
 
 class ChessAI {
-  static const int MAX_DEPTH = 3;
+  static const int MAX_DEPTH = 2;  // Reduced depth for faster computation
   
   static Map<String, int> pieceValues = {
-    'p': 100,
-    'n': 320,
-    'b': 330,
-    'r': 500,
-    'q': 900,
-    'k': 20000,
+    'p': 1,
+    'n': 3,
+    'b': 3,
+    'r': 5,
+    'q': 9,
+    'k': 100,
   };
 
   static int evaluateBoard(chess.Chess game) {
     if (game.in_checkmate) {
-      return game.turn == chess.Color.WHITE ? -999999 : 999999;
+      return game.turn == chess.Color.WHITE ? -10000 : 10000;
     }
     
     if (game.in_draw || game.in_stalemate || game.in_threefold_repetition) {
@@ -39,48 +39,21 @@ class ChessAI {
     return score;
   }
 
-  static int minimax(chess.Chess game, int depth, int alpha, int beta, bool maximizing) {
-    if (depth == 0 || game.game_over) {
-      return evaluateBoard(game);
-    }
-
-    final moves = game.moves({'verbose': true}) as List<Map<String, dynamic>>;
-    
-    if (maximizing) {
-      int maxEval = -999999;
-      for (var move in moves) {
-        game.move(move);
-        int eval = minimax(game, depth - 1, alpha, beta, false);
-        game.undo();
-        maxEval = maxEval > eval ? maxEval : eval;
-        alpha = alpha > eval ? alpha : eval;
-        if (beta <= alpha) break;
-      }
-      return maxEval;
-    } else {
-      int minEval = 999999;
-      for (var move in moves) {
-        game.move(move);
-        int eval = minimax(game, depth - 1, alpha, beta, true);
-        game.undo();
-        minEval = minEval < eval ? minEval : eval;
-        beta = beta < eval ? beta : eval;
-        if (beta <= alpha) break;
-      }
-      return minEval;
-    }
-  }
-
   static Map<String, dynamic>? getBestMove(chess.Chess game) {
+    if (game.game_over) return null;
+
     final moves = game.moves({'verbose': true}) as List<Map<String, dynamic>>;
     if (moves.isEmpty) return null;
 
+    // Add randomness to move selection for variety
+    moves.shuffle();
+
     Map<String, dynamic>? bestMove;
-    int bestValue = -999999;
+    int bestValue = -99999;
 
     for (var move in moves) {
       game.move(move);
-      int value = minimax(game, MAX_DEPTH - 1, -999999, 999999, false);
+      int value = -evaluateBoard(game);  // Simplified evaluation
       game.undo();
 
       if (value > bestValue) {

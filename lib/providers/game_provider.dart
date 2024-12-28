@@ -41,17 +41,27 @@ class GameProvider extends ChangeNotifier {
     _isThinking = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 500));
+    try {
+      // Add a small delay to show the thinking state
+      await Future.delayed(const Duration(milliseconds: 300));
 
-    final move = ChessAI.getBestMove(_game);
-    if (move != null) {
-      _game.move(move);
+      // Add timeout to prevent infinite thinking
+      final move = await Future.delayed(
+        const Duration(seconds: 2),
+        () => ChessAI.getBestMove(_game),
+      );
+
+      if (move != null && !_game.game_over) {
+        _game.move(move);
+      }
+    } catch (e) {
+      print('AI move error: $e');
+    } finally {
+      _isThinking = false;
+      _selectedPiece = null;
+      _validMoves = [];
+      notifyListeners();
     }
-
-    _isThinking = false;
-    _selectedPiece = null;
-    _validMoves = [];
-    notifyListeners();
   }
 
   Future<bool> movePiece(String from, String to) async {
