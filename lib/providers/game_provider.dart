@@ -38,6 +38,7 @@ class GameProvider extends ChangeNotifier {
   Future<void> makeAIMove() async {
     if (_game.turn != chess.Color.BLACK || _isThinking || _game.game_over) {
       print('Skipping AI move: wrong turn or game state');
+      print('Turn: ${_game.turn}, Thinking: $_isThinking, Game over: ${_game.game_over}');
       return;
     }
     
@@ -48,19 +49,25 @@ class GameProvider extends ChangeNotifier {
       // Small delay for UI feedback
       await Future.delayed(const Duration(milliseconds: 500));
 
+      print('Current board state:');
+      print(_game.ascii);
+      print('Current turn: ${_game.turn}');
+
       // Get AI move
       final move = ChessAI.getBestMove(_game);
       print('AI move selected: $move');
 
-      if (move != null) {
+      if (move != null && move['from'] != null && move['to'] != null) {
         // Make the move
         final result = _game.move({
           'from': move['from']!,
           'to': move['to']!,
-          if (move['promotion'] != null) 'promotion': move['promotion']
+          if (move['promotion'] != null) 'promotion': move['promotion']!
         });
 
         print('Move made: $result');
+        print('New board state:');
+        print(_game.ascii);
         
         if (result == null) {
           print('Failed to make move: ${move['from']} to ${move['to']}');
@@ -68,8 +75,9 @@ class GameProvider extends ChangeNotifier {
       } else {
         print('No valid moves found for AI');
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       print('Error making AI move: $e');
+      print('Stack trace: $stackTrace');
     } finally {
       _isThinking = false;
       _selectedPiece = null;
